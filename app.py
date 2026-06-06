@@ -58,9 +58,7 @@ def predict(title, description, year, length, votes, mpaa, manual_genres):
             length = llm_features["runtime_min"]
 
     if not title:
-        msg = "### Please enter a movie title"
-        msg += " (or a description, with an OpenAI key set)." if not LLM_ON else " or a description."
-        return msg, {}, ""
+        return "### Please enter a movie title or a description.", {}, ""
 
     # Genre source priority: your checkboxes > LLM-extracted > classical title model.
     if manual_genres:
@@ -106,9 +104,6 @@ def predict(title, description, year, length, votes, mpaa, manual_genres):
     else:
         note = ("This is an estimate. Ratings of obscure films are inherently noisy "
                 "(typical error ~1.3 points); confidence is higher for films with many votes.")
-        if not LLM_ON:
-            note += ("\n\n_Tip: set an `OPENAI_API_KEY` to enable AI-written explanations "
-                     "and free-text movie descriptions._")
     return md, prob_map, note
 
 
@@ -119,22 +114,19 @@ EXAMPLES = [
     ["Love in the Time of Spreadsheets", "", 1999, 95, 1200, "PG-13", []],
 ]
 
-_llm_banner = ("**AI explanation: ON** (OpenAI configured)" if LLM_ON
-               else "_AI explanation is OFF - set an `OPENAI_API_KEY` secret to enable the LLM features._")
-
 with gr.Blocks(title="CineSense") as demo:
     gr.Markdown(
         "# CineSense - movie rating estimator\n"
         "Estimate a film's IMDb rating by **fusing structured metadata (ML) with "
-        "title-text NLP**. Leave genres empty and the NLP block infers them. "
-        "With an OpenAI key, you can also **describe a movie in plain text** and get "
-        "an **AI-written explanation**.\n\n" + _llm_banner
+        "title-text NLP**. Leave genres empty and the NLP block infers them from the "
+        "title. You can also **describe a movie in plain text** to get an "
+        "**AI-written explanation** of the estimate."
     )
     with gr.Row():
         with gr.Column():
             title = gr.Textbox(label="Movie title", placeholder="e.g. The Last Silent Romance")
             description = gr.Textbox(
-                label="...or describe the movie (optional, needs OpenAI key)",
+                label="...or describe the movie (optional)",
                 placeholder="e.g. A heist comedy set in a failing circus", lines=2)
             with gr.Row():
                 year = gr.Number(label="Year", value=2010, precision=0)
