@@ -1,0 +1,88 @@
+{
+  "sparse_metadata_scenario": {
+    "desc": "votes & genres unknown (new/unreleased film)",
+    "rmse_numeric_only": 1.548,
+    "rmse_fused": 1.5178,
+    "improvement_pct": 1.95
+  },
+  "group_permutation_importance_rmse_increase": {
+    "numeric_block": 0.4377,
+    "title_nlp_block": 0.0661
+  },
+  "largest_residuals": [
+    {
+      "title": "Chepor, La",
+      "year": 2004,
+      "votes": 13,
+      "true": 1.0,
+      "pred": 7.03
+    },
+    {
+      "title": "Secrets of the City",
+      "year": 1994,
+      "votes": 5,
+      "true": 1.4,
+      "pred": 7.09
+    },
+    {
+      "title": "Menthe - la bienheureuse",
+      "year": 1979,
+      "votes": 49,
+      "true": 1.1,
+      "pred": 6.57
+    },
+    {
+      "title": "Mugunghwaggoti pieotseubnida",
+      "year": 1995,
+      "votes": 5,
+      "true": 1.4,
+      "pred": 6.82
+    },
+    {
+      "title": "Why Elvis?",
+      "year": 1994,
+      "votes": 15,
+      "true": 1.2,
+      "pred": 6.53
+    },
+    {
+      "title": "Saturday Night Sleazies, Vol. 2",
+      "year": 1991,
+      "votes": 5,
+      "true": 1.1,
+      "pred": 6.38
+    },
+    {
+      "title": "Face on the Bar-Room Floor, The",
+      "year": 1923,
+      "votes": 7,
+      "true": 1.0,
+      "pred": 6.27
+    },
+    {
+      "title": "Rachel's Daughters: Searching for the Causes of Breast Cancer",
+      "year": 1997,
+      "votes": 8,
+      "true": 1.4,
+      "pred": 6.6
+    }
+  ],
+  "fairness_by_title_type": {
+    "latin_script": {
+      "n": 8810,
+      "rmse_fused": 1.2898
+    },
+    "non_latin_script": {
+      "n": 0,
+      "rmse_fused": null
+    },
+    "multi_word_title": {
+      "n": 7316,
+      "rmse_fused": 1.282
+    },
+    "single_word_title": {
+      "n": 1494,
+      "rmse_fused": 1.3271
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "comparison": {
+    "word_tfidf_logreg": {
+      "val_micro_f1": 0.374,
+      "val_macro_f1": 0.3068
+    },
+    "char_tfidf_logreg": {
+      "val_micro_f1": 0.3934,
+      "val_macro_f1": 0.3353
+    },
+    "count_nb": {
+      "val_micro_f1": 0.2791,
+      "val_macro_f1": 0.2168
+    }
+  },
+  "best": "char_tfidf_logreg",
+  "test_micro_f1": 0.4001,
+  "test_macro_f1": 0.3448,
+  "per_genre_test_f1": {
+    "Action": 0.2842,
+    "Animation": 0.3295,
+    "Comedy": 0.4975,
+    "Drama": 0.5036,
+    "Documentary": 0.2363,
+    "Romance": 0.181,
+    "Short": 0.381
+  }
+}

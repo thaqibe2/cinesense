@@ -1,0 +1,83 @@
+{
+  "baseline_test_rmse": 1.5428,
+  "model_comparison_val": {
+    "ridge": {
+      "val_rmse": 1.4304,
+      "val_mae": 1.1029,
+      "val_r2": 0.1578
+    },
+    "random_forest": {
+      "val_rmse": 1.319,
+      "val_mae": 0.9989,
+      "val_r2": 0.2839
+    },
+    "hist_gbm": {
+      "val_rmse": 1.2969,
+      "val_mae": 0.9757,
+      "val_r2": 0.3077
+    }
+  },
+  "best_model": "hist_gbm",
+  "ablation_test": {
+    "numeric": {
+      "test_rmse": 1.3182,
+      "test_mae": 0.9878,
+      "test_r2": 0.2699
+    },
+    "text": {
+      "test_rmse": 1.5166,
+      "test_mae": 1.1951,
+      "test_r2": 0.0337
+    },
+    "fused": {
+      "test_rmse": 1.2898,
+      "test_mae": 0.969,
+      "test_r2": 0.3011
+    }
+  },
+  "coldstart": {
+    "<20": {
+      "n": 3536,
+      "rmse_numeric": 1.5745,
+      "rmse_fused": 1.5509,
+      "improvement_pct": 1.5
+    },
+    "20-100": {
+      "n": 2931,
+      "rmse_numeric": 1.228,
+      "rmse_fused": 1.1904,
+      "improvement_pct": 3.06
+    },
+    "100-1k": {
+      "n": 1653,
+      "rmse_numeric": 1.0123,
+      "rmse_fused": 0.9748,
+      "improvement_pct": 3.71
+    },
+    ">=1k": {
+      "n": 690,
+      "rmse_numeric": 0.7897,
+      "rmse_fused": 0.7861,
+      "improvement_pct": 0.46
+    }
+  },
+  "num_feats": [
+    "year",
+    "length",
+    "log_votes",
+    "log_budget",
+    "has_budget",
+    "n_genres",
+    "decade",
+    "Action",
+    "Animation",
+    "Comedy",
+    "Drama",
+    "Documentary",
+    "Romance",
+    "Short"
+  ],
+  "cat_feats": [
+    "mpaa"
+  ]
+}

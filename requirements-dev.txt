@@ -1,0 +1,4 @@
+# Additional dependencies needed to reproduce data prep, training and EDA.
+-r requirements.txt
+pydataset==0.2.0
+matplotlib==3.10.8
