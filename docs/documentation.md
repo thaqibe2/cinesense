@@ -11,15 +11,15 @@ Code references point at files in this repository, e.g.
 - Project title: **CineSense - Cold-Start Movie Rating Estimation by Fusing Metadata (ML) with Title NLP**
 - Student: Besfort Thaqi
 - GitHub repository URL: https://github.com/thaqibe2/cinesense
-- Deployment URL: _<will be https://huggingface.co/spaces/thaqibe2/cinesense after you run deploy/deploy_hf.py>_
+- Deployment URL: https://huggingface.co/spaces/thaqibe2/cinesense
 - Submission date: 2026-06-07
 
 ### Mandatory Setup Checks
 
 - [x] At least 2 blocks selected (ML Numeric + NLP)
 - [x] Multiple and different data sources used (IMDb numeric, IMDb title text, VADER lexicon, wordfreq corpus)
-- [ ] Deployment URL provided _(fill in after deploying to Hugging Face Spaces)_
-- [ ] Required GitHub users added to repository (`jasminh`, `bkuehnis`) _(add as collaborators after creating the repo)_
+- [x] Deployment URL provided (https://huggingface.co/spaces/thaqibe2/cinesense)
+- [x] Required GitHub users added to repository (`jasminh`, `bkuehnis`)
 
 ## Selected AI Blocks
 
@@ -29,7 +29,7 @@ Code references point at files in this repository, e.g.
 
 Primary blocks used for core solution (choose 2):
 - Primary block 1: **ML Numeric Data** (rating regression)
-- Primary block 2: **NLP** (title text -> genre + style/rarity features)
+- Primary block 2: **NLP** (title text -> genre + style/rarity features; two approaches: classical models and an optional OpenAI LLM)
 
 No third block is used; effort is concentrated on integrating the two selected blocks well.
 
@@ -122,8 +122,10 @@ The fusion logic is implemented in [`src/fused_model.py`, lines 30-41](../src/fu
 - Prompt design or retrieval setup: N/A - classical NLP (no LLM/RAG). The design decision is the featurization: char-TFIDF -> TruncatedSVD(20) for latent style + VADER sentiment + wordfreq rarity + style flags.
 
 #### 2B.3 Approach Selection
-- Approach used: classical NLP - multi-label (OneVsRest) classification of genres from the title, plus an unsupervised title featurizer for fusion.
-- Alternatives considered: transformer embeddings / an LLM explainer were deliberately avoided (a) to keep training and inference fully reproducible offline and (b) because a transformer is overkill for ~16-character titles and would obscure the integration question.
+Two NLP approaches are used and compared:
+- **Classical NLP** (core, offline): multi-label (OneVsRest) classification of genres from the title, plus an unsupervised title featurizer for fusion. Kept as the reproducible prediction engine.
+- **LLM / prompt engineering** (OpenAI, optional): a prompt-engineered layer (see [`src/llm.py`](../src/llm.py)) that (a) extracts structured features from a free-text movie description and (b) writes a grounded explanation of the prediction. JSON-mode prompts with an allowed-genre whitelist and post-validation guard against hallucination; every call has a fallback so the app runs without a key.
+- Rationale: the classical model guarantees reproducibility and isolates the integration question; the LLM adds world knowledge, a natural-language interface, and an explanation layer that pure feature models cannot provide.
 
 #### 2B.4 Comparison and Iterations
 | Iteration | Objective | Key changes | Model or prompt setup | Main metric or qualitative check | Change vs previous |
@@ -131,8 +133,11 @@ The fusion logic is implemented in [`src/fused_model.py`, lines 30-41](../src/fu
 | 1 | Word-level baseline | word TF-IDF (1-2) + OVR LogReg | classical | Val micro-F1 0.374 | - |
 | 2 | Better tokenisation | char_wb TF-IDF (3-5) + OVR LogReg | classical | Val micro-F1 **0.393** | +0.019 (best) |
 | 3 | Generative-model baseline | CountVectorizer + MultinomialNB | classical | Val micro-F1 0.279 | -0.114 (worse) |
+| 4 | LLM approach | OpenAI `gpt-4o-mini`, title-only prompt | LLM | micro/macro-F1 in `reports/llm_comparison.md` | classical vs LLM on a 60-title sample |
 
 ![Per-genre F1](../reports/figures/06_nlp_per_genre_f1.png)
+
+The classical-vs-LLM comparison is produced by [`src/llm_compare.py`](../src/llm_compare.py) on a small capped sample (default 60 titles, < $0.01) and written to [`reports/llm_comparison.md`](../reports/llm_comparison.md). Both approaches hit the same ceiling - a bare title is weak genre evidence - but the LLM leverages knowledge of real titles while the classical model only sees character patterns.
 
 #### 2B.5 Evaluation and Error Analysis
 - Evaluation strategy: micro/macro-F1 on val for model choice; final per-genre F1 on test; plus a qualitative review of predictions. The featurizer is evaluated indirectly via the numeric ablation and permutation importance.
@@ -142,16 +147,17 @@ The fusion logic is implemented in [`src/fused_model.py`, lines 30-41](../src/fu
 
 #### 2B.6 Integration with Other Block(s)
 - Inputs received from other block(s): none directly; the NLP block consumes raw titles and genre labels from the shared dataset plus two external lexicons/corpora.
-- Outputs provided to other block(s): (1) the `TitleFeaturizer` vector used as fused features by the ML regressor; (2) inferred genre probabilities used by the app to fill genres when the user provides none.
+- Outputs provided to other block(s): (1) the `TitleFeaturizer` vector used as fused features by the ML regressor; (2) inferred genre probabilities used by the app to fill genres when the user provides none; (3) **LLM-extracted structured features** - when the user types a free-text description, the LLM returns a canonical title, genres and year/runtime that become inputs to the ML model (free text -> LLM -> ML); (4) a **grounded LLM explanation** of each prediction, built only from the model's own outputs (rating, genre probabilities, cold-start flag) to avoid hallucination.
 
 ---
 
 ## 3. Deployment
 
-- Deployment URL: _<add after deploying to Hugging Face Spaces>_
-- Main user flow: the user enters a movie title and any known metadata (year, runtime, optional vote count, MPAA, optional genres) and clicks "Estimate rating". If genres are left empty, the NLP block infers them from the title; if the vote count is empty the app enters cold-start mode (neutral popularity prior, title signal weighted more). The app returns the predicted rating, the genres used (and whether NLP inferred them), and the title->genre probabilities. See [`app.py`](../app.py).
-- Separation of training and inference: training scripts in `src/` produce `models/*.joblib`; `app.py` only loads those artifacts and calls `FusedRatingModel.predict` - it never trains.
-- Screenshot or short demo: provisional UI rendering below; replace with a live screenshot of the deployed Space.
+- Deployment URL: https://huggingface.co/spaces/thaqibe2/cinesense
+- Main user flow: the user enters a movie title and any known metadata (year, runtime, optional vote count, MPAA, optional genres) - or a free-text description - and clicks "Estimate rating". If genres are left empty, the NLP block infers them from the title; if the vote count is empty the app enters cold-start mode (neutral popularity prior, title signal weighted more). The app returns the predicted rating, the genres used, the title->genre probabilities, and (when an OpenAI key is set) an AI-written explanation. See [`app.py`](../app.py).
+- LLM configuration: the app reads `OPENAI_API_KEY` from the environment. On the Space, set it under **Settings -> Variables and secrets**; locally, `export OPENAI_API_KEY=...`. Without it, the app shows "AI explanation: OFF" and falls back to the classical pipeline (no crash).
+- Separation of training and inference: training scripts in `src/` produce `models/*.joblib`; `app.py` only loads those artifacts and calls `FusedRatingModel.predict` - it never trains. The LLM is inference-only and never used during training.
+- Screenshot or short demo: live screenshot of the running Space (`thaqibe2/cinesense`) below.
 
 ![App preview](../reports/figures/13_app_preview.png)
 
@@ -175,8 +181,11 @@ The fusion logic is implemented in [`src/fused_model.py`, lines 30-41](../src/fu
 - Inference/run command(s):
   ```bash
   python app.py            # http://localhost:7860
+  # optional LLM features + comparison (needs an OpenAI key):
+  export OPENAI_API_KEY=sk-...      # set OPENAI_API_KEY=... on Windows
+  python src/llm_compare.py 60      # classical-vs-LLM study -> reports/llm_comparison.md
   ```
-- Reproducibility notes: global seed 42 (splits, SVD, models). Versions pinned in `requirements.txt` (scikit-learn 1.7.2, numpy 2.2.6, gradio 6.15.2, wordfreq 3.1.1). Full pipeline runs in ~1 minute on 2 CPU cores; no GPU required.
+- Reproducibility notes: global seed 42 (splits, SVD, models). Versions pinned in `requirements.txt` (scikit-learn 1.7.2, numpy 2.2.6, gradio 6.15.2, wordfreq 3.1.1, openai 2.41.0). The classical pipeline runs in ~1 minute on 2 CPU cores with no GPU and no network. The LLM layer is optional and only calls the OpenAI API at inference (one short call per request); default model `gpt-4o-mini` (override with `OPENAI_MODEL`).
 
 ---
 
@@ -187,9 +196,11 @@ The fusion logic is implemented in [`src/fused_model.py`, lines 30-41](../src/fu
 - [x] A core section is done exceptionally well (rigorous numeric/text/fused ablation + per-vote-bucket and sparse-metadata analyses)
 - [x] Extended evaluation (feature-group permutation importance, sparse-metadata scenario, residual analysis)
 - [x] Ethics, bias, or fairness analysis (see below)
-- [x] Creative or exceptional use case (title-text fusion for cold-start rating, not the usual "predict + LLM-explain")
+- [x] Creative or exceptional use case (title-text fusion for cold-start rating + LLM free-text feature extraction)
+- [x] Two NLP approaches implemented and compared (classical char-TFIDF/LogReg **and** an OpenAI LLM with prompt engineering)
 
 Evidence for selected bonus items:
+- **LLM integration & prompt engineering**: an optional OpenAI layer ([`src/llm.py`](../src/llm.py)) extracts structured features from a free-text description (free text -> LLM -> ML inputs) and writes grounded explanations. Hallucination is mitigated by JSON-mode prompts, an allowed-genre whitelist, output validation, and explanations restricted to the model's own outputs; cost is bounded (one short call per request, default `gpt-4o-mini`). A capped classical-vs-LLM study is in `reports/llm_comparison.md`.
 - **Fairness / bias**: RMSE is similar for multi-word titles (1.282) and slightly worse for single-word titles (1.327), so the model is mildly less reliable when there is less text to read. The corpus contains **zero non-Latin-script titles** - foreign films appear romanized - so the model is entirely untested on non-Latin scripts and should not be trusted on them (`reports/eval_metrics.json` -> `fairness_by_title_type`). Genre F1 is far lower for under-represented genres (Romance 0.18), a class-imbalance bias to flag before any real use.
 - **Extended evaluation**: the sparse-metadata scenario (votes & genres blanked to mimic an unreleased film) shows fusion improving RMSE by **+1.95%** over numeric-only, confirming the title carries the most relative value exactly when metadata is missing.
 

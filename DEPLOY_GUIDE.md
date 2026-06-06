@@ -57,6 +57,22 @@ files" and drag in `app.py`, `requirements.txt`, the `src/` folder and the
 
 ---
 
+## 2b. (Optional) Enable the AI / LLM features
+
+The app works without this, but to turn on free-text descriptions and AI-written
+explanations, give it an OpenAI key:
+
+- **Locally:** `set OPENAI_API_KEY=sk-...` (Windows) before `py app.py`.
+- **On the Space:** open your Space -> Settings -> *Variables and secrets* ->
+  **New secret** -> name `OPENAI_API_KEY`, value your key. The Space restarts and
+  the banner switches to "AI explanation: ON".
+- Optional comparison study (classical vs LLM, ~60 titles, <$0.01):
+  `set OPENAI_API_KEY=sk-...` then `py src/llm_compare.py 60` -> writes
+  `reports/llm_comparison.md`.
+
+Default model is `gpt-4o-mini`; set `OPENAI_MODEL=gpt-4.1-nano` for a cheaper one.
+Never commit your key or paste it in chat.
+
 ## 3. Finalise the documentation (1 min)
 
 Open `docs/documentation.md` and fill the two placeholders, then tick the boxes:

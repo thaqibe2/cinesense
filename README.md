@@ -29,6 +29,10 @@ features, and those NLP outputs are fed as inputs into the numeric rating model.
 - **NLP (E.2)** - classical NLP on titles: char n-gram TF-IDF + logistic
   regression for multi-label genre prediction, plus a TitleFeaturizer
   (char-TFIDF -> SVD + VADER sentiment + word-rarity + style stats).
+- **LLM (optional, OpenAI)** - a prompt-engineered layer: describe a film in
+  free text and the LLM extracts structured features for the ML model, and it
+  writes a grounded explanation of each prediction. Enabled by setting
+  `OPENAI_API_KEY`; without it the app cleanly falls back to the classical models.
 - **Integration** - the NLP title features and (optionally NLP-inferred) genres
   are concatenated with the numeric features for a single fused regressor. At
   inference, if the user gives no genres, the NLP block infers them from the

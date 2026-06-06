@@ -82,6 +82,7 @@ Everything else below is done.
 3. **Added NLP qualitative analysis** (`reports/nlp_qualitative.md`): representative predictions + real failure cases, as the template's 2B.5 requests.
 4. **Embedded all key figures inline** in `docs/documentation.md` and **added explicit EDA findings** (distributions, weak correlations, genre/decade effects, missing-data and low-vote anomalies).
 5. **Added `LICENSE` (MIT)** to match the README declaration and updated `run_all.py` to include the qualitative step.
+6. **Added an optional OpenAI LLM layer** (`src/llm.py`): free-text movie descriptions -> structured features for the ML model, plus grounded AI explanations of predictions, with a classical-vs-LLM comparison script (`src/llm_compare.py`). This adds a second NLP approach (LLM/prompt engineering) and an explicit "AI" component; it falls back cleanly when no `OPENAI_API_KEY` is set.
 6. Refreshed every metric in `docs/documentation.md` and `README.md` to the retrained values.
 
 ## Honest caveats / known limitations
