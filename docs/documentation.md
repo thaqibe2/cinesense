@@ -149,6 +149,28 @@ The classical-vs-LLM comparison is produced by [`src/llm_compare.py`](../src/llm
 - Inputs received from other block(s): none directly; the NLP block consumes raw titles and genre labels from the shared dataset plus two external lexicons/corpora.
 - Outputs provided to other block(s): (1) the `TitleFeaturizer` vector used as fused features by the ML regressor; (2) inferred genre probabilities used by the app to fill genres when the user provides none; (3) **LLM-extracted structured features** - when the user types a free-text description, the LLM returns a canonical title, genres and year/runtime that become inputs to the ML model (free text -> LLM -> ML); (4) a **grounded LLM explanation** of each prediction, built only from the model's own outputs (rating, genre probabilities, cold-start flag) to avoid hallucination.
 
+### 2C. Computer Vision (If selected)
+
+N/A - Computer Vision is not used in this project. The application combines the two required blocks (ML Numeric Data + NLP); a third block is optional. The subsections below are marked N/A to preserve the template structure.
+
+#### 2C.1 Data Source(s)
+N/A
+
+#### 2C.2 Preprocessing and Augmentation
+N/A
+
+#### 2C.3 Model Selection
+N/A
+
+#### 2C.4 Model Comparison and Iterations
+N/A
+
+#### 2C.5 Evaluation and Error Analysis
+N/A
+
+#### 2C.6 Integration with Other Block(s)
+N/A
+
 ---
 
 ## 3. Deployment
@@ -197,7 +219,6 @@ The classical-vs-LLM comparison is produced by [`src/llm_compare.py`](../src/llm
 - [x] Extended evaluation (feature-group permutation importance, sparse-metadata scenario, residual analysis)
 - [x] Ethics, bias, or fairness analysis (see below)
 - [x] Creative or exceptional use case (title-text fusion for cold-start rating + LLM free-text feature extraction)
-- [x] Two NLP approaches implemented and compared (classical char-TFIDF/LogReg **and** an OpenAI LLM with prompt engineering)
 
 Evidence for selected bonus items:
 - **LLM integration & prompt engineering**: an optional OpenAI layer ([`src/llm.py`](../src/llm.py)) extracts structured features from a free-text description (free text -> LLM -> ML inputs) and writes grounded explanations. Hallucination is mitigated by JSON-mode prompts, an allowed-genre whitelist, output validation, and explanations restricted to the model's own outputs; cost is bounded (one short call per request, default `gpt-4o-mini`). A capped classical-vs-LLM study is in `reports/llm_comparison.md`.
